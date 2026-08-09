@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
+import * as THREE from 'three';
 import githubIcon from './assets/GitHub_Invertocat_White_Clearspace.svg';
 
 function AnimatedShape() {
@@ -11,15 +12,18 @@ function AnimatedShape() {
       meshRef.current.rotation.x += delta * 0.2;
       meshRef.current.rotation.y += delta * 0.3;
       meshRef.current.rotation.z += delta * 0.1;
+      meshRef.current.scale.x = THREE.MathUtils.damp(meshRef.current.scale.x, 1.4, 1.5, delta);
+      meshRef.current.scale.y = THREE.MathUtils.damp(meshRef.current.scale.y, 1.4, 1.5, delta);
+      meshRef.current.scale.z = THREE.MathUtils.damp(meshRef.current.scale.z, 1.4, 1.5, delta);
     }
   });
 
   return (
     <Float speed={2} rotationIntensity={1} floatIntensity={2}>
-      <mesh ref={meshRef} scale={1.4}>
-        <torusKnotGeometry args={[1.9, 0.4, 128, 32, 2, 3]} />
+      <mesh ref={meshRef} scale={[0, 0, 0]}>
+      <torusKnotGeometry args={[1.9, 0.4, 64, 16, 2, 3]} />
         <meshPhysicalMaterial
-          color="#008cff" /* Deep Royal Blue */
+          color="#008cff"
           roughness={0.25}
           metalness={0.1}
           clearcoat={0.3}
@@ -31,23 +35,34 @@ function AnimatedShape() {
 }
 
 export default function App() {
-  const [isGithubHovered, setIsGithubHovered] = useState(false);
+  const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden', backgroundColor: '#070b19' /* Midnight Navy */ }}>
-      {/* 3D Canvas Layer */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
+    <div style={{ position: 'relative', width: '100%', height: '100dvh', overflow: 'hidden', backgroundColor: '#070b19' }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          opacity: isCanvasLoaded ? 1 : 0,
+          transition: 'opacity 2s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 0, 5], fov: 60 }}
+          onCreated={() => setIsCanvasLoaded(true)}
+          style={{ backgroundColor: '#070b19' }}
+        >
           <ambientLight intensity={0.2} />
           <directionalLight position={[5, 5, 5]} intensity={4} color="#ffffff" />
-          <directionalLight position={[-5, -5, -2]} intensity={2} color="#3b82f6" /* Vibrant Blue Rim Light */ />
-          <pointLight position={[0, 0, 2]} intensity={3} color="#9dff00" /* Soft Icy White Light */ />
+          <directionalLight position={[-5, -5, -2]} intensity={2} color="#3b82f6" />
+          <pointLight position={[0, 0, 2]} intensity={3} color="#9dff00" />
 
           <AnimatedShape />
         </Canvas>
       </div>
 
-      {/* Backdrop Blur Overlay */}
       <div
         style={{
           position: 'absolute',
@@ -55,12 +70,9 @@ export default function App() {
           zIndex: 1,
           backdropFilter: 'blur(60px)',
           WebkitBackdropFilter: 'blur(60px)',
-          transform: 'scale(1.2)',
           pointerEvents: 'none',
         }}
       />
-
-      {/* Top Header Badge */}
       <div style={{ position: 'absolute', top: '18px', left: 0, right: 0, zIndex: 3, display: 'flex', justifyContent: 'center' }}>
         <span
           style={{
@@ -78,7 +90,6 @@ export default function App() {
         </span>
       </div>
 
-      {/* Hero Text Content */}
       <div
         style={{
           position: 'relative',
@@ -113,41 +124,17 @@ export default function App() {
         </h1>
 
         <p style={{ maxWidth: '500px', opacity: 0.7, fontSize: '0.9rem', lineHeight: 1.4 }}>
-        I build software, experiment with AI, and explore how systems work from the ground up.
+          I build software, experiment with AI, and explore how systems work from the ground up.
         </p>
 
-        {/* GitHub Link Button with Hover Effect */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '16px' }}>
           <a
             href="https://github.com/kfo1a"
             target="_blank"
             rel="noopener noreferrer"
-            onMouseEnter={() => setIsGithubHovered(true)}
-            onMouseLeave={() => setIsGithubHovered(false)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textDecoration: 'none',
-              transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: isGithubHovered ? 'scale(1.1)' : 'scale(1)',
-            }}
+            className="github-link"
           >
-            <img
-              src={githubIcon}
-              alt="GitHub"
-              style={{
-                width: '48px',
-                height: '48px',
-                padding: '8px',
-                boxSizing: 'border-box',
-                background: isGithubHovered ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)',
-                border: isGithubHovered ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: '20px',
-                boxShadow: isGithubHovered ? '0 8px 20px rgba(0, 0, 0, 0.3)' : '0 2px 5px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            />
+            <img src={githubIcon} alt="GitHub" />
           </a>
         </div>
       </div>
