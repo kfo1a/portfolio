@@ -17,13 +17,9 @@ My interests span software development, AI, systems, networking, infrastructure,
 
 The portfolio is built with modern web technologies, with a focus on keeping the site fast, responsive, and simple.
 
-- TypeScript
 - JavaScript
-- Python
 - React
-- React Native
 - Responsive design
-- C# (kind of :) )
 
 ## Projects
 
