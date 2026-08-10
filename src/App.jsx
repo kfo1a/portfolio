@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
@@ -36,6 +36,32 @@ function AnimatedShape() {
 
 export default function App() {
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
+  const overlayRef = useRef();
+
+  useEffect(() => {
+    const baseBlur = 60;
+
+    const applyBlur = () => {
+      const scale = (window.visualViewport && typeof window.visualViewport.scale === 'number') ? window.visualViewport.scale : 1;
+      const dpr = window.devicePixelRatio || 1;
+      const computed = baseBlur / (scale * dpr);
+      if (overlayRef.current) {
+        overlayRef.current.style.backdropFilter = `blur(${computed}px)`;
+        overlayRef.current.style.WebkitBackdropFilter = `blur(${computed}px)`;
+      }
+    };
+
+    applyBlur();
+
+    const vv = window.visualViewport;
+    if (vv && vv.addEventListener) vv.addEventListener('resize', applyBlur);
+    window.addEventListener('resize', applyBlur);
+
+    return () => {
+      if (vv && vv.removeEventListener) vv.removeEventListener('resize', applyBlur);
+      window.removeEventListener('resize', applyBlur);
+    };
+  }, []);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100dvh', overflow: 'hidden', backgroundColor: '#070b19' }}>
@@ -64,15 +90,15 @@ export default function App() {
       </div>
 
       <div
+        ref={overlayRef}
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 1,
-          backdropFilter: 'blur(60px)',
-          WebkitBackdropFilter: 'blur(60px)',
           pointerEvents: 'none',
         }}
       />
+      
       <div style={{ position: 'absolute', top: '18px', left: 0, right: 0, zIndex: 3, display: 'flex', justifyContent: 'center' }}>
         <span
           style={{
